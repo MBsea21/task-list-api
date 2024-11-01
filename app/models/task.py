@@ -8,6 +8,6 @@ class Task(db.Model):
     title: Mapped[str]
     description: Mapped[str]
     completed_at: Mapped[Optional[datetime]]= mapped_column(nullable = True)
-    is_complete: Mapped[Optional[bool]]= mapped_column(nullable = True)
+
 
 

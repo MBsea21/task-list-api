@@ -13,22 +13,25 @@ def create_task():
 
     # is_complete = check_for_completion(request_body)
     is_complete = False
-
+##completed_at not an attribute
     try: 
         completed_at = request_body["completed_at"]
-        new_task = Task(title=title, description= description,completed_at= completed_at, is_complete=True) 
-
     except: 
-        new_task = Task(title=title, description= description, is_complete=False)
+        completed_at = None
+    new_task = Task(title=title, description= description,completed_at= completed_at) 
+
+
 
     db.session.add(new_task)
     db.session.commit()
+    
 
+    is_complete = check_for_completion(new_task)
     response = {
         "id": new_task.id,
         "title": new_task.title,
         "description": new_task.description,
-        "is_complete": new_task.is_complete
+        "is_complete": is_complete
     }
 
     return response, 201
@@ -56,25 +59,65 @@ def get_tasks():
 
     tasks_response = []
 
-    for task in tasks: 
+    for task in tasks:  
         tasks_response.append(get_dict(task))
 
-    return tasks_response
+    return tasks_response,200
     
 
-def check_for_completion(request_body):
-    try :
-        request_body["completed_at"]
-        return True
 
-    except: 
-        return False    
+@tasks_bp.get("/<task_id>")
+def get_one_task(task_id):
+    task = validate_task(task_id)
+    task_dict = get_dict(task)
+    response = {"task":task_dict}
+    expected = {
+        "task": {
+            "id": 1,
+            "title": "A Brand New Task",
+            "description": "Test Description",
+            "is_complete": False
+        }
+    }
+    print("the task dictionary is:\n", dict)
+    print("the expected dictitonary was:\n",expected) 
+    return response,200
+
+
+
+#helperfunctions
+
+def check_for_completion(task):
+    completed_at = task.completed_at
+    if completed_at is None: 
+        return False
+    else: 
+        return True
 
 def get_dict(task):
     return {
         "id": task.id,
         "title": task.title,
         "description": task.description,
-        "is_complete": task.is_complete
+        "is_complete": check_for_completion(task)
     }
+
+def validate_task(task_id):
+    try:
+        task_id = int(task_id)
+    except:
+        response = ({"message" : f"task {task_id} not a valid id"},400)
+        abort(make_response(response))
+    
+    query = db.select(Task).where(Task.id == task_id)
+    task = db.session.scalar(query)
+
+    if not task:
+        response = ({"message": f"task {task_id} not found"},404)
+        abort(make_response(response))
+    
+    return task
+    
+
+
 
