@@ -4,12 +4,21 @@ from ..db import db
 
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
+invalid_data_response = ({"details" : "Invalid data"}, 400)
+
 #create a new task in database
 @tasks_bp.post("")
 def create_task(): 
     request_body = request.get_json()
-    title = request_body["title"]
-    description = request_body["description"]
+    try: 
+        title = request_body["title"]
+    except: 
+        abort(make_response(invalid_data_response))
+
+    try:
+        description = request_body["description"]
+    except: 
+        abort(make_response(invalid_data_response))
 
     # is_complete = check_for_completion(request_body)
     is_complete = False
