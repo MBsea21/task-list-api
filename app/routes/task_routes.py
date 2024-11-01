@@ -4,7 +4,7 @@ from ..db import db
 
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
-
+#create a new task in database
 @tasks_bp.post("")
 def create_task(): 
     request_body = request.get_json()
@@ -21,21 +21,21 @@ def create_task():
     new_task = Task(title=title, description= description,completed_at= completed_at) 
 
 
-
     db.session.add(new_task)
     db.session.commit()
     
 
     is_complete = check_for_completion(new_task)
-    response = {
+    response = {"task":{
         "id": new_task.id,
         "title": new_task.title,
         "description": new_task.description,
         "is_complete": is_complete
-    }
+    }}
 
     return response, 201
 
+#get all tasks with query paramaters added in 
 @tasks_bp.get("")
 def get_tasks():
     query = db.select(Task)
@@ -65,7 +65,7 @@ def get_tasks():
     return tasks_response,200
     
 
-
+#get task by task id: 
 @tasks_bp.get("/<task_id>")
 def get_one_task(task_id):
     task = validate_task(task_id)
@@ -82,6 +82,41 @@ def get_one_task(task_id):
     print("the task dictionary is:\n", dict)
     print("the expected dictitonary was:\n",expected) 
     return response,200
+
+#update task
+@tasks_bp.put("/<task_id>")
+def update_task(task_id):
+    task = validate_task(task_id)
+    
+    request_body = request.get_json()
+    task.title = request_body["title"]
+    task.description = request_body["description"]
+    try:
+        completed_at = request_body["completed_at"]
+    except:
+        completed_at=task.completed_at
+    
+    task.completed_at = completed_at
+    db.session.commit()
+    
+    response = {"task":get_dict(task)}
+    return response, 200
+
+
+#Delete task
+@tasks_bp.delete("/<task_id>")
+def delete_task(task_id):
+    task = validate_task(task_id)
+    task_title = task.title
+    print(task_title)
+    
+
+    db.session.delete(task)
+    db.session.commit()
+    details = f"Task {task_id} \"{task_title}\" successfully deleted"
+    response_body = {"details" : details}
+
+    return response_body
 
 
 
@@ -106,14 +141,14 @@ def validate_task(task_id):
     try:
         task_id = int(task_id)
     except:
-        response = ({"message" : f"task {task_id} not a valid id"},400)
+        response = ({"details" : "invalid data"},400)
         abort(make_response(response))
     
     query = db.select(Task).where(Task.id == task_id)
     task = db.session.scalar(query)
 
     if not task:
-        response = ({"message": f"task {task_id} not found"},404)
+        response = ({"details": f"task {task_id} not found"},404)
         abort(make_response(response))
     
     return task
