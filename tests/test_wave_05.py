@@ -24,7 +24,8 @@ def test_get_goals_one_saved_goal(client, one_goal):
     assert response_body == [
         {
             "id": 1,
-            "title": "Build a habit of going outside daily"
+            "title": "Build a habit of going outside daily",
+            "task_ids": []
         }
     ]
 
@@ -41,7 +42,8 @@ def test_get_goal(client, one_goal):
     assert response_body == {
         "goal": {
             "id": 1,
-            "title": "Build a habit of going outside daily"
+            "title": "Build a habit of going outside daily",
+            "task_ids": []
         }
     }
 
@@ -54,7 +56,7 @@ def test_get_goal_not_found(client):
     response_body = response.get_json()
 
     assert response.status_code == 404
-    assert response_body == {"message": "Goal 1 not found"}
+    assert response_body == {"error": "Goal 1 not found"}
 
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
@@ -71,7 +73,8 @@ def test_create_goal(client):
     assert response_body == {
         "goal": {
             "id": 1,
-            "title": "My New Goal"
+            "title": "My New Goal",
+            "task_ids": []
         }
     }
 

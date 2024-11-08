@@ -121,8 +121,13 @@ def test_get_task_includes_goal_id(client, one_task_belongs_to_one_goal):
     print({
         "task": {
             "id": 1,
+<<<<<<< HEAD
             "goal_id": 1,m
             "title": "Go on y daily walk 🏞",
+=======
+            "goal_id": 1,
+            "title": "Go on my daily walk 🏞",
+>>>>>>> a3849fc (have gotten all tests up until the final two tests in wave 6 complete. Currently working on getting correct response body for the final two tests in wave 6)
             "description": "Notice something new every day",
             "is_complete": False
         }
