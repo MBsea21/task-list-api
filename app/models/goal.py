@@ -9,7 +9,7 @@ from ..db import db
 class Goal(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     title: Mapped[str]
-    tasks: Mapped[list["Task"]] = relationship("Task",back_populates="goal", lazy=True)
+    tasks: Mapped[list["Task"]] = relationship("Task",back_populates="goal")
     # description=Mapped[str]
     # completed_at: Mapped[Optional[datetime]]=mapped_column(nullable = True)
 

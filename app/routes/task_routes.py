@@ -4,6 +4,7 @@ from app.routes.utilities_routes import create_model, validate_model, get_models
 from ..db import db
 from datetime import datetime
 import requests
+import os
 
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
@@ -20,40 +21,6 @@ def get_tasks():
     request_arguements= request.args
     return get_models_with_filters(Task,request_arguements), 200
 
-
-# def get_tasks():
-#     query = db.select(Task)
-#     title_param = request.args.get("title")
-#     if title_param: 
-#         query = query.where(Task.title.ilike(f"%{title_param}%"))
-#         title_param = request.args.get("title")
-    
-#     description_param = request.args.get("description")
-#     if description_param: 
-#         query = query.where(Task.description.ilike(f"%{description_param}%"))
-
-
-#     is_complete_param = request.args.get("is_complete")
-#     if is_complete_param: 
-#         query = query.where(Task.is_complete.ilike(f"%{is_complete_param}%"))
-    
-
-#     sort_param = request.args.get("sort")
-#     if sort_param == "asc": 
-#         query = query.order_by(Task.title.asc())
-
-#     elif sort_param == "desc":
-#         query = query.order_by(Task.title.desc())
-    
-#     tasks = db.session.scalars(query)
-
-#     tasks_response = []
-
-#     for task in tasks:  
-#         tasks_response.append(task.to_dict())
-
-#     return tasks_response,200
-    
 
 #get task by task id: 
 @tasks_bp.get("/<task_id>")
@@ -113,21 +80,19 @@ def delete_task(task_id):
 def mark_complete(task_id):
     task = validate_model(Task, task_id)
     task.completed_at = datetime.now()
+    slack_channel = os.environ.get("SLACK_CHANNEL")
+    slack_url = os.environ.get("SLACK_URL")
     db.session.commit()
-
     message = f"Task {task.title} has been marked as complete!"
-    # slack_url = "http://127.0.0.1:5000/send_message"
-    slack_url = "https://task-list-api-hf3r.onrender.com/send_message"
+
     payload = {
         "message": message,
-        "channel": "api-test-channel"
+        "channel": slack_channel
     }
 
-    try:
-        response = requests.post(slack_url, json=payload)
-        response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        print(f"failed to send slack message: {e}")
+    response = requests.post(slack_url, json=payload)
+    if response.status_code != 200: 
+        return {"errror": "failed to send slack notification"}, 500
 
     response = {"task": task.to_dict()}
     return make_response(response, 200)
