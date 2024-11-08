@@ -4,6 +4,7 @@ from app.routes.utilities_routes import create_model, validate_model, get_models
 from ..db import db
 from datetime import datetime
 import requests
+from app.routes.slack_routes import send_message
 import os
 
 
@@ -90,7 +91,7 @@ def mark_complete(task_id):
         "channel": slack_channel
     }
 
-    response = requests.post(slack_url, json=payload)
+    response = send_message(slack_url,payload)
     if response.status_code != 200: 
         return {"errror": "failed to send slack notification"}, 500
 

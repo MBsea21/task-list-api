@@ -6,21 +6,14 @@ import os
 slack_bp = Blueprint('slack_bp', __name__)
 
 # Slack Bot Token from environment variable
-slack_url = os.getenv("SLACK_URL")
-slack_api_token = os.getenv("SLACK_BOT_TOKEN")
-headers = {
+
+def send_message(slack_url, message):
+    slack_api_token = os.getenv("SLACK_BOT_TOKEN")
+    headers = {
         "Authorization" : f"Bearer {slack_api_token}",
         "Content-Type": "application/json"
-    }
-
-
-@slack_bp.post('/send_message')
-def send_message():
-    data = request.get_json()
-    channel = data.get("channel")
-    message = data.get("message")
-
-    response = requests.post(slack_url, headers=headers, json=message)
+        }
+    response = requests.post(url=slack_url, headers=headers, json=message)
     return response
     
     
