@@ -16,38 +16,43 @@ def create_task():
     return create_model(Task,request_body)
 
 @tasks_bp.get("")
-def get_tasks():
-    query = db.select(Task)
-    title_param = request.args.get("title")
-    if title_param: 
-        query = query.where(Task.title.ilike(f"%{title_param}%"))
-        title_param = request.args.get("title")
+def get_tasks(): 
+    request_arguements= request.args
+    return get_models_with_filters(Task,request_arguements), 200
+
+
+# def get_tasks():
+#     query = db.select(Task)
+#     title_param = request.args.get("title")
+#     if title_param: 
+#         query = query.where(Task.title.ilike(f"%{title_param}%"))
+#         title_param = request.args.get("title")
     
-    description_param = request.args.get("description")
-    if description_param: 
-        query = query.where(Task.description.ilike(f"%{description_param}%"))
+#     description_param = request.args.get("description")
+#     if description_param: 
+#         query = query.where(Task.description.ilike(f"%{description_param}%"))
 
 
-    is_complete_param = request.args.get("is_complete")
-    if is_complete_param: 
-        query = query.where(Task.is_complete.ilike(f"%{is_complete_param}%"))
+#     is_complete_param = request.args.get("is_complete")
+#     if is_complete_param: 
+#         query = query.where(Task.is_complete.ilike(f"%{is_complete_param}%"))
     
 
-    sort_param = request.args.get("sort")
-    if sort_param == "asc": 
-        query = query.order_by(Task.title.asc())
+#     sort_param = request.args.get("sort")
+#     if sort_param == "asc": 
+#         query = query.order_by(Task.title.asc())
 
-    elif sort_param == "desc":
-        query = query.order_by(Task.title.desc())
+#     elif sort_param == "desc":
+#         query = query.order_by(Task.title.desc())
     
-    tasks = db.session.scalars(query)
+#     tasks = db.session.scalars(query)
 
-    tasks_response = []
+#     tasks_response = []
 
-    for task in tasks:  
-        tasks_response.append(task.to_dict())
+#     for task in tasks:  
+#         tasks_response.append(task.to_dict())
 
-    return tasks_response,200
+#     return tasks_response,200
     
 
 #get task by task id: 
@@ -111,7 +116,7 @@ def mark_complete(task_id):
     db.session.commit()
 
     message = f"Task {task.title} has been marked as complete!"
-    
+    # slack_url = "http://127.0.0.1:5000/send_message"
     slack_url = "https://task-list-api-hf3r.onrender.com/send_message"
     payload = {
         "message": message,
