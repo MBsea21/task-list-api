@@ -28,6 +28,6 @@ def send_message():
         error_message = e.response["error"]
         print(f"Slack API Error: {error_message}")
         return jsonify({"ok": False, "error": error_message}), 400
-    app.run(debug=True)
+
 
 
