@@ -63,7 +63,7 @@ def test_get_task_not_found(client):
 
     # Assert
     assert response.status_code == 404
-    assert response_body == {"details": "task 1 not found"}
+    assert response_body == {"error": "Task 1 not found"}
 
 
 
@@ -134,7 +134,7 @@ def test_update_task_not_found(client):
 
     # Assert
     assert response.status_code == 404
-    assert response_body == {"details": "task 1 not found"}
+    assert response_body == {"error": "Task 1 not found"}
 
     
 
@@ -162,7 +162,7 @@ def test_delete_task_not_found(client):
 
     # Assert
     assert response.status_code == 404
-    assert response_body == {"details":"task 1 not found"}
+    assert response_body == {"error":"Task 1 not found"}
     assert Task.query.all() == []
 
 
@@ -176,9 +176,9 @@ def test_create_task_must_contain_title(client):
 
     # Assert
     assert response.status_code == 400
-    assert "details" in response_body
+    assert "error" in response_body
     assert response_body == {
-        "details": "Invalid data"
+        "error": "Invalid request: missing title"
     }
     assert Task.query.all() == []
 
@@ -193,8 +193,8 @@ def test_create_task_must_contain_description(client):
 
     # Assert
     assert response.status_code == 400
-    assert "details" in response_body
+    assert "error" in response_body
     assert response_body == {
-        "details": "Invalid data"
+        "error": "Invalid request: missing description"
     }
     assert Task.query.all() == []
