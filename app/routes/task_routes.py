@@ -112,7 +112,7 @@ def mark_complete(task_id):
 
     message = f"Task {task.title} has been marked as complete!"
     
-    slack_url = "http://127.0.0.1:5000/send_message"
+    slack_url = "https://task-list-api-hf3r.onrender.com/send_message"
     payload = {
         "message": message,
         "channel": "api-test-channel"
@@ -135,10 +135,6 @@ def mark_incomplete(task_id):
     response = {"task": task.to_dict()}
     return make_response(response,200)
 
-
-
-#helperfunctions
-    
 
 
 
