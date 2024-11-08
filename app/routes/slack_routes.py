@@ -8,7 +8,7 @@ slack_bp = Blueprint('slack_bp', __name__)
 
 # Slack Bot Token from environment variable
 
-client = WebClient(token=os.get_env(SLACK_BOT_TOKEN))
+client = WebClient(token=os.get_env("SLACK_BOT_TOKEN"))
 
 @slack_bp.post('/send_message')
 def send_message():
