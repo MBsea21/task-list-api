@@ -58,14 +58,16 @@ def get_one_goal(goal_id):
 def get_tasks_for_specific_goal(goal_id):
     goal = validate_model(Goal, goal_id)
     goal_as_dict = goal.to_dict()
-    print(goal_as_dict)
-    request_arguement = {"Goal_Id": goal_id}
-    filtered_result_body= get_models_with_filters(Task, request_arguement)
-    
+    tasks = [task.to_dict() for task in goal.tasks]
+
     response_body = {
         "id": goal_as_dict.get("id"),
-        "title": goal_as_dict.get("title"),
-        "tasks": (filtered_result_body)}
+        "title": goal_as_dict.get('title'),
+        "tasks": tasks
+    }
+    for key, value in goal_as_dict.items():
+        print("Key is : ", key), 
+        print("Value is :", value)
 
     return response_body, 200
     

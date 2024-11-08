@@ -7,7 +7,7 @@ import os
 slack_bp = Blueprint('slack_bp', __name__)
 
 # Slack Bot Token from environment variable
-SLACK_BOT_TOKEN =" os.getenv("APITOKENHERE")
+SLACK_BOT_TOKEN ="n/a"
 client = WebClient(token=SLACK_BOT_TOKEN)
 
 @slack_bp.post('/send_message')
