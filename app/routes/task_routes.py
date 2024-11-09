@@ -1,10 +1,10 @@
 from flask import Blueprint, abort, make_response, request, Response
 from app.models.task import Task
 from app.routes.utilities_routes import create_model, validate_model, get_models_with_filters, check_for_completion, delete_model
-from ..db import db
+from app.routes.slack_functions import send_message
 from datetime import datetime
+from ..db import db
 import requests
-from app.routes.slack_routes import send_message
 import os
 
 
@@ -66,14 +66,6 @@ def update_task(task_id):
 def delete_task(task_id):
     task = validate_model(Task,task_id)
     return delete_model(Task, task)
-    # task_title = task.title
-
-    # db.session.delete(task)
-    # db.session.commit()
-    # details = f"Task {task_id} \"{task_title}\" successfully deleted"
-    # response_body = {"details" : details}
-
-    # return response_body
 
 
 #route 2
@@ -81,22 +73,18 @@ def delete_task(task_id):
 def mark_complete(task_id):
     task = validate_model(Task, task_id)
     task.completed_at = datetime.now()
-    slack_channel = os.environ.get("SLACK_CHANNEL")
-    slack_url = os.environ.get("SLACK_URL")
-    db.session.commit()
     message = f"Task {task.title} has been marked as complete!"
+    slack_response= send_message(message)
 
-    payload = {
-        "message": message,
-        "channel": slack_channel
-    }
-
-    response = send_message(slack_url,payload)
-    if response.status_code != 200: 
+    if slack_response.status_code == 200: 
+        response = {"task":task.to_dict()}
+        db.session.commit()
+        return (response,200)
+    elif slack_response.status_code != 200: 
         return {"errror": "failed to send slack notification"}, 500
 
-    response = {"task": task.to_dict()}
-    return make_response(response, 200)
+
+
 
 @tasks_bp.patch("/<task_id>/mark_incomplete")
 def mark_incomplete(task_id):
@@ -105,7 +93,5 @@ def mark_incomplete(task_id):
     db.session.commit()
     response = {"task": task.to_dict()}
     return make_response(response,200)
-
-
 
 
