@@ -1,6 +1,4 @@
 from flask import Flask, request, jsonify
-from slack_sdk import WebClient
-from slack_sdk.errors import SlackApiError
 from .db import db, migrate
 from .models import task, goal
 from .routes.task_routes import tasks_bp
