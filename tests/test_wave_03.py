@@ -22,10 +22,9 @@ def test_mark_complete_on_incomplete_task(client, one_task):
     """
     with patch("requests.post") as mock_get:
         mock_get.return_value.status_code = 200
-
     # Act
-    response = client.patch("/tasks/1/mark_complete")
-    response_body = response.get_json()
+        response = client.patch("/tasks/1/mark_complete")
+        response_body = response.get_json()
 
     # Assert
     assert response.status_code == 200
@@ -127,7 +126,7 @@ def test_mark_complete_missing_task(client):
 
     # Assert
     assert response.status_code == 404
-    assert response_body == {"error": f"Task 1 not found"}
+    assert response_body == {"details" : "Task 1 not found"}
 
 ## @pytest.mark.skip(reason="No way to test this feature yet")
 def test_mark_incomplete_missing_task(client):
@@ -137,4 +136,4 @@ def test_mark_incomplete_missing_task(client):
 
     # Assert
     assert response.status_code == 404
-    assert response_body == {"error": f"Task 1 not found"}
+    assert response_body == {"details" : "Task 1 not found"}

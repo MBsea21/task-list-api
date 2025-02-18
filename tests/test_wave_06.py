@@ -9,7 +9,6 @@ def test_post_task_ids_to_goal(client, one_goal, three_tasks):
         "task_ids": [1, 2, 3]
     })
     response_body = response.get_json()
-    print("Response BODY!!!: \n", response_body)
 
     assert response.status_code == 200
     assert "id" in response_body
@@ -51,7 +50,7 @@ def test_get_tasks_for_specific_goal_no_goal(client):
     # Assert
     assert response.status_code == 404
     assert response_body == {
-        "error": "Goal 1 not found"
+        "details": "Goal 1 not found"
     }
 
 
@@ -60,7 +59,6 @@ def test_get_tasks_for_specific_goal_no_tasks(client, one_goal):
     # Act
     response = client.get("/goals/1/tasks")
     response_body = response.get_json()
-    print("RESPONSE BODY HERE:\n", response_body)
     # Assert
     assert response.status_code == 200
     assert "tasks" in response_body
@@ -77,21 +75,7 @@ def test_get_tasks_for_specific_goal(client, one_task_belongs_to_one_goal):
     # Act
     response = client.get("/goals/1/tasks")
     response_body = response.get_json()
-    print("RESPONSE BODY IS HERE\n", response_body)
-    print("EXPECTED RESPONSE WAS!")
-    print({
-        "id": 1,
-        "title": "Build a habit of going outside daily",
-        "tasks": [
-            {
-                "id": 1,
-                "goal_id": 1,
-                "title": "Go on my daily walk 🏞",
-                "description": "Notice something new every day",
-                "is_complete": False
-            }
-        ]
-    })
+  
 
     # Assert
     assert response.status_code == 200

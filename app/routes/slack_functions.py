@@ -3,31 +3,25 @@ import requests
 import os
 
 
-def send_message(message):
-    slack_channel = os.environ.get("SLACK_CHANNEL")
-    slack_url = os.environ.get("SLACK_URL")
-
-    slack_api_token = os.getenv("SLACK_BOT_TOKEN")
+def send_message(message, slack_channel, slack_url, slack_api_token):
+    headers = { 
+         'Authorization': f'Bearer {slack_api_token}',
+         'Content-Type': 'application/json'
+    }
     payload = {
         "channel": slack_channel,
         "text": message
-        }
+        }   
         
-    response = requests.post(slack_url, data=payload)
-    message_sent = check_response(response)
-    if message_sent is True:
-        return make_response({"message":"Slack message has been sent"}, 200)
-    else: 
-        abort(make_response({"error":"something else broke, line 22 was met"}, 400))
+    response = requests.post(slack_url, json=payload, headers= headers)
+    if response.status_code != 200 or response.json().get("ok") is not True: 
+        print(f"Failed to send Slack message: {response.text}")
 
-def check_response(response):
+def send_message_with_config(message): 
+        slack_channel = os.environ.get("SLACK_CHANNEL")
+        slack_url = os.environ.get("SLACK_URL")
+        slack_api_token = os.getenv("SLACK_BOT_TOKEN")
 
-    if response.status_code == 200:
-        return True
-    else:
-        error_message = "could not post to slack, was unable to call slack api. Check slack url, token, and request body"
-        abort(make_response({"error": error_message},400))
-
-
+        return send_message(message, slack_channel, slack_url, slack_api_token)
 
     

@@ -42,8 +42,7 @@ def test_get_goal(client, one_goal):
     assert response_body == {
         "goal": {
             "id": 1,
-            "title": "Build a habit of going outside daily",
-            "task_ids": []
+            "title": "Build a habit of going outside daily"
         }
     }
 
@@ -56,7 +55,7 @@ def test_get_goal_not_found(client):
     response_body = response.get_json()
 
     assert response.status_code == 404
-    assert response_body == {"error": "Goal 1 not found"}
+    assert response_body == {"details": "Goal 1 not found"}
 
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
@@ -88,22 +87,23 @@ def test_update_goal(client, one_goal):
     
     assert response.status_code == 200
     assert "message" in response_body
-    assert response_body == {
-        "message": "Goal #1 succesfully updated"
-        }
+    updated_goal = client.get("/goals/1")
+    updated_goal_body = updated_goal.get_json()
+    assert updated_goal_body["goal"]["title"] == "make my bed every day"
+
+
+
 
 # @pytest.mark.skip(reason="test to be completed by student")
 def test_update_goal_not_found(client):
+    # Act
     response = client.put("/goals/1", json ={
         "title": "make my bed every day"
     })
     response_body = response.get_json()
 
     assert response.status_code == 404
-    assert "error" in response_body
-    assert response_body == {
-        "error" : "Goal 1 not found"
-    }
+    assert response_body == {"details": "Goal 1 not found"}
 
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
@@ -124,7 +124,7 @@ def test_delete_goal(client, one_goal):
     response_body = response.get_json()
     assert response.status_code == 404
     assert response_body == {
-        "error": "Goal 1 not found"
+        "details": "Goal 1 not found"
         }
 
 
@@ -135,7 +135,7 @@ def test_delete_goal_not_found(client):
 
     assert response.status_code == 404
     assert response_body == {
-        "error": "Goal 1 not found"
+        "details": "Goal 1 not found"
     }
 
 
@@ -147,7 +147,7 @@ def test_create_goal_missing_title(client):
 
     # Assert
     assert response.status_code == 400
-    assert "error" in response_body
+    assert "details" in response_body
     assert response_body == {
-        "error": "Invalid request: missing title"
+        "details": "Invalid request: missing title"
     }

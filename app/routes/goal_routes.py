@@ -6,20 +6,24 @@ from ..db import db
 from datetime import datetime
 from app.routes.utilities_routes import create_model, validate_model, get_models_with_filters, check_for_completion, delete_model
 
-import requests
-
-goals_bp = Blueprint("goals_bp",__name__, url_prefix= "/goals")
+bp = Blueprint("bp",__name__, url_prefix= "/goals")
 
 
 ####################################################################
 ######################### Create FUNCTIONS #########################
 ####################################################################
-@goals_bp.post("")
+@bp.post("")
 def create_goal():
     request_body = request.get_json()
-    return create_model(Goal,request_body)
+    
+    if not request_body or not request_body.get("title"):
+        return make_response({"details": "Invalid Request: missing title"}, 400) 
+    
+    goal = create_model(Goal, request_body)
+    return make_response({"goal": goal.to_dict()}, 201)
 
-@goals_bp.post("/<goal_id>/tasks")
+
+@bp.post("/<goal_id>/tasks")
 def post_task_ids_to_goal(goal_id):
     request_body = request.get_json() 
     goal = validate_model(Goal, goal_id)
@@ -27,15 +31,16 @@ def post_task_ids_to_goal(goal_id):
     task_ids = request_body.get("task_ids", [])
     for task_id in task_ids:
         task = validate_model(Task, task_id)
-        if task:
-            goal.tasks.append(task)
+        goal.tasks.append(task)
     
     db.session.commit()
-    goal = goal.to_dict()
-    response_body = {
-        "id": goal.get("id"),
-        "task_ids": goal.get("task_ids")
+
+    response_body = { 
+        "id": goal.id, 
+        "title": goal.title, 
+        "task_ids": [task.id for task in goal.tasks]
     }
+
 
     return response_body, 200
 
@@ -43,53 +48,61 @@ def post_task_ids_to_goal(goal_id):
 ####################################################################
 ######################### READ FUNCTIONS #########################
 ####################################################################
-@goals_bp.get("")
+
+@bp.get("")
 def get_goals():
     request_arguements = request.args
-    return get_models_with_filters(Goal, request_arguements)
+    goals = get_models_with_filters(Goal, request_arguements)
+    if not goals: 
+        return make_response([], 200)
+    
+    return make_response(goals, 200)
 
-@goals_bp.get("/<goal_id>")
+@bp.get("/<goal_id>")
 def get_one_goal(goal_id):
-    goal = validate_model(Goal, goal_id)
-    response = {"goal": goal.to_dict()}
-    return make_response(response, 200)
+    try: 
+        goal = validate_model(Goal, goal_id)
+        return make_response({"goal": goal.to_dict()}, 200)
+    except: 
+        return make_response({"details": f"Goal {goal_id} not found"}, 404)
 
-@goals_bp.get("/<goal_id>/tasks")
+@bp.get("/<goal_id>/tasks")
 def get_tasks_for_specific_goal(goal_id):
     goal = validate_model(Goal, goal_id)
-    goal_as_dict = goal.to_dict()
-    tasks = [task.to_dict() for task in goal.tasks]
-
-    response_body = {
-        "id": goal_as_dict.get("id"),
-        "title": goal_as_dict.get('title'),
-        "tasks": tasks
-    }
-    for key, value in goal_as_dict.items():
-        print("Key is : ", key), 
-        print("Value is :", value)
-
+    response_body = goal.to_dict_with_tasks()
+    response_body["tasks"] = [task.to_dict() for task in goal.tasks]
     return response_body, 200
     
 ####################################################################
 ######################### UPDATE FUNCTIONS #########################
 ####################################################################
-@goals_bp.put("/<goal_id>")
+@bp.put("/<goal_id>")
 def update_goal(goal_id):
     goal = validate_model(Goal, goal_id)
     request_body = request.get_json()
 
-    goal_title = request_body["title"]
+    goal_title = request_body.get("title")
+    if not goal_title: 
+        return make_response({"details": "Invalid request: missing title"}, 400)
+    goal.title = goal_title 
     db.session.commit()
 
-    response_body = {"message": f"Goal #{goal_id} succesfully updated"}
-    return make_response(response_body, 200)
+    return make_response({"goal": goal.to_dict()}, 200)
 
 
 ####################################################################
 ######################### DELETE FUNCTIONS #########################
 ####################################################################
-@goals_bp.delete("/<goal_id>")
+@bp.delete("/<goal_id>")
 def delete_goal(goal_id):
     goal = validate_model(Goal, goal_id)
-    return delete_model(Goal, goal)
+    goal_id = goal.id
+    goal_title = goal.title 
+
+    db.session.delete(goal)
+    db.session.commit()
+
+    response_body = { 
+        "details": f'Goal {goal_id} "{goal_title}" successfully deleted'
+    }
+    return make_response(response_body, 200)

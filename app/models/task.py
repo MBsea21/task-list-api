@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..db import db
 from datetime import datetime
-from app.routes.utilities_routes import create_model, validate_model, check_for_completion
 from typing import Optional
 from sqlalchemy import ForeignKey
 
@@ -9,16 +8,17 @@ class Task(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     title: Mapped[str]
     description: Mapped[str]
-    completed_at: Mapped[Optional[datetime]]= mapped_column(nullable = True)
-    goal_id: Mapped[Optional[int]] = mapped_column(ForeignKey("goal.id"), nullable=True)
+    completed_at: Mapped[Optional[datetime]]
+    goal_id: Mapped[Optional[int]] = mapped_column(ForeignKey("goal.id"))
     goal: Mapped["Goal"] = relationship("Goal", back_populates="tasks")
 
     def to_dict(self):
-        task_as_dict = {}
-        task_as_dict["id"] = self.id
-        task_as_dict["title"] = self.title
-        task_as_dict["description"] = self.description
-        task_as_dict["is_complete"] = check_for_completion(Task,self)
+        task_as_dict = {
+            "id": self.id, 
+            "title": self.title, 
+            "description": self.description, 
+            "is_complete": check_for_completion(Task, self)
+        }
         if self.goal_id:
             task_as_dict["goal_id"] = self.goal_id
         
@@ -35,3 +35,6 @@ class Task(db.Model):
             goal_id = goal_id
         )
         return new_task
+    
+    def check_for_completion(self):
+        return self.completed_at is not None

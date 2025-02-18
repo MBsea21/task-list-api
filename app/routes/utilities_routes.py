@@ -12,7 +12,7 @@ def validate_model(cls, model_id):
     model = db.session.scalar(query)
     
     if not model: 
-        response = {"error": f"{cls.__name__} {model_id} not found"}
+        response = {"details": f"{cls.__name__} {model_id} not found"}
         abort(make_response(response, 404))
 
     return model
@@ -22,7 +22,7 @@ def create_model(cls, model_data):
         new_model = cls.from_dict(model_data)
 
     except KeyError as error: 
-        response = {"error": f"Invalid request: missing {error.args[0]}"}        
+        response = {"details": "Invalid data"}        
         abort(make_response(response, 400))
     
     db.session.add(new_model)
@@ -62,9 +62,3 @@ def delete_model(cls,model):
     response_body = {"details": details}
     return response_body
 
-def check_for_completion(cls, model):
-    completed_at = model.completed_at
-    if completed_at is None:
-        return False
-    else: 
-        return True
