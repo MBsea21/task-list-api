@@ -10,7 +10,6 @@ def send_message(message):
     slack_api_token = os.getenv("SLACK_BOT_TOKEN")
     payload = {
         "channel": slack_channel,
-        "token": slack_api_token,
         "text": message
         }
         
