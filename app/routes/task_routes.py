@@ -1,13 +1,13 @@
 from flask import Blueprint, abort, make_response, request, Response
 from app.models.task import Task
-from app.routes.utilities_routes import create_model, validate_model, get_models_with_filters, check_for_completion, delete_model
-from app.routes.slack_functions import send_message
+from app.routes.utilities_routes import create_model, validate_model, get_models_with_filters, delete_model
+from app.routes.slack_functions import send_message_with_config
 from datetime import datetime, timezone
 from ..db import db
 import os
 
 
-bp = Blueprint("bp", __name__, url_prefix="/tasks")
+bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 invalid_data_response = ({"details": "Invalid data"}, 400)
 
 #create a new task in database
@@ -69,12 +69,13 @@ def mark_complete(task_id):
     utc_now = datetime.now(timezone.utc)
     task.completed_at = utc_now
     message = f"Task {task.title} has been marked as complete!"
-    slack_response= send_message(message)
+    slack_response= send_message_with_config(message)
     db.session.commit()
     response = {"task": task.to_dict()}
-    if slack_response.status_code != 200 or not slack_response.json().get("ok"): 
-        error_msg = slack_response.json().get("errror", "Unknown error")
-        response["slack_error"] = f"Failed to send slack Notification: {error_msg}"
+    if slack_response == None:
+    # if slack_response.status_code != 200 or not slack_response.json().get("ok"): 
+        # error_msg = slack_response.json().get("errror", "Unknown error")
+        print("slack_error : Failed to send slack Notification")
 
     return response, 200 
 

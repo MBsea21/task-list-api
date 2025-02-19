@@ -11,13 +11,15 @@ class Task(db.Model):
     completed_at: Mapped[Optional[datetime]]
     goal_id: Mapped[Optional[int]] = mapped_column(ForeignKey("goal.id"))
     goal: Mapped["Goal"] = relationship("Goal", back_populates="tasks")
+    
+
 
     def to_dict(self):
         task_as_dict = {
             "id": self.id, 
             "title": self.title, 
             "description": self.description, 
-            "is_complete": check_for_completion(Task, self)
+            "is_complete": check_for_completion(self)
         }
         if self.goal_id:
             task_as_dict["goal_id"] = self.goal_id
@@ -36,5 +38,8 @@ class Task(db.Model):
         )
         return new_task
     
-    def check_for_completion(self):
-        return self.completed_at is not None
+def check_for_completion(self):
+    if self.completed_at is not None:
+        return True
+    else :
+        return False

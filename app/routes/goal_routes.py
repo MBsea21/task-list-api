@@ -4,9 +4,9 @@ from app.models.goal import Goal
 from app.models.task import Task
 from ..db import db
 from datetime import datetime
-from app.routes.utilities_routes import create_model, validate_model, get_models_with_filters, check_for_completion, delete_model
+from app.routes.utilities_routes import *
 
-bp = Blueprint("bp",__name__, url_prefix= "/goals")
+bp = Blueprint("goal_bp",__name__, url_prefix= "/goals")
 
 
 ####################################################################
@@ -17,10 +17,10 @@ def create_goal():
     request_body = request.get_json()
     
     if not request_body or not request_body.get("title"):
-        return make_response({"details": "Invalid Request: missing title"}, 400) 
+        return make_response({"details": "Invalid data: missing title"}, 400) 
     
     goal = create_model(Goal, request_body)
-    return make_response({"goal": goal.to_dict()}, 201)
+    return make_response(goal, 201)
 
 
 @bp.post("/<goal_id>/tasks")
@@ -37,7 +37,6 @@ def post_task_ids_to_goal(goal_id):
 
     response_body = { 
         "id": goal.id, 
-        "title": goal.title, 
         "task_ids": [task.id for task in goal.tasks]
     }
 
@@ -69,7 +68,7 @@ def get_one_goal(goal_id):
 @bp.get("/<goal_id>/tasks")
 def get_tasks_for_specific_goal(goal_id):
     goal = validate_model(Goal, goal_id)
-    response_body = goal.to_dict_with_tasks()
+    response_body = goal.to_dict()
     response_body["tasks"] = [task.to_dict() for task in goal.tasks]
     return response_body, 200
     

@@ -15,7 +15,7 @@ def send_message(message, slack_channel, slack_url, slack_api_token):
         
     response = requests.post(slack_url, json=payload, headers= headers)
     if response.status_code != 200 or response.json().get("ok") is not True: 
-        print(f"Failed to send Slack message: {response.text}")
+        print("Failed to send Slack message: error unknown")
 
 def send_message_with_config(message): 
         slack_channel = os.environ.get("SLACK_CHANNEL")

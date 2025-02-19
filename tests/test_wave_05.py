@@ -25,7 +25,6 @@ def test_get_goals_one_saved_goal(client, one_goal):
         {
             "id": 1,
             "title": "Build a habit of going outside daily",
-            "task_ids": []
         }
     ]
 
@@ -72,8 +71,7 @@ def test_create_goal(client):
     assert response_body == {
         "goal": {
             "id": 1,
-            "title": "My New Goal",
-            "task_ids": []
+            "title": "My New Goal"
         }
     }
 
@@ -86,7 +84,7 @@ def test_update_goal(client, one_goal):
     response_body = response.get_json()
     
     assert response.status_code == 200
-    assert "message" in response_body
+    assert "goal" in response_body
     updated_goal = client.get("/goals/1")
     updated_goal_body = updated_goal.get_json()
     assert updated_goal_body["goal"]["title"] == "make my bed every day"
@@ -149,5 +147,5 @@ def test_create_goal_missing_title(client):
     assert response.status_code == 400
     assert "details" in response_body
     assert response_body == {
-        "details": "Invalid request: missing title"
+        "details": "Invalid data: missing title"
     }

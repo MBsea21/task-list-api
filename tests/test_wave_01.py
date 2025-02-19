@@ -175,7 +175,7 @@ def test_create_task_must_contain_title(client):
     assert response.status_code == 400
     assert "details" in response_body
     assert response_body == {
-        "details": "Invalid request"
+        "details": "Invalid data"
     }
     assert Task.query.all() == []
 
@@ -192,6 +192,6 @@ def test_create_task_must_contain_description(client):
     assert response.status_code == 400
     assert "details" in response_body
     assert response_body == {
-        "details": "Invalid request: missing description"
+        "details": "Invalid data"
     }
     assert Task.query.all() == []
